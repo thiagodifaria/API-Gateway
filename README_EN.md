@@ -1,340 +1,221 @@
-# HTTPS Server - High-Performance C++ Web Server
+# API Gateway
 
-Advanced HTTPS server implementation in C++17 featuring comprehensive SIMD-optimized network operations, HTTP parsing acceleration, validation engines, compression algorithms, and advanced cryptographic implementations. This project delivers a complete solution for high-throughput web applications with hand-coded assembly optimizations.
+![API Gateway](https://img.shields.io/badge/API%20Gateway-High%20Performance-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
 
-## 🎯 Features
+**C++17 API Gateway with HTTPS, reverse proxying, load balancing, health checks, authentication, rate limiting, observability and SIMD/assembly acceleration.**
 
-- ✅ **SIMD Network Operations**: Base64 vectorized, UUID v4 hardware RNG, hex encoding optimized
-- ✅ **HTTP Parsing Acceleration**: AVX2 \r\n\r\n detection, method/URI extraction, header counting
-- ✅ **Validation Engine**: JSON SIMD validation, UTF-8 vectorized, input sanitization
-- ✅ **Advanced Cryptography**: ChaCha20-Poly1305, Blake3, X25519, AES-NI, SHA-256 AVX
-- ✅ **Compression Suite**: Deflate, LZ4, Brotli with sliding window optimization
-- ✅ **Performance Benchmarks**: Real-time web interface for testing all optimizations
-- ✅ **Production Ready**: TLS 1.3, structured logging, thread pool, cross-platform
+[![C++](https://img.shields.io/badge/C++-17-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org)
+[![OpenSSL](https://img.shields.io/badge/OpenSSL-TLS-721412?style=flat&logo=openssl&logoColor=white)](https://openssl.org)
+[![CMake](https://img.shields.io/badge/CMake-3.16+-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org)
+[![NASM](https://img.shields.io/badge/NASM-Assembly-FF6600?style=flat)](https://nasm.us)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat)](LICENSE)
 
-## 🗂️ Architecture
+---
 
-Modular architecture with SIMD-optimized components:
+## Documentation
 
+**[Main README](README.md)**  
+**[Leia em Portugues](README_PT.md)**  
+**[Architecture](docs/ARQUITETURA.md)**  
+**[API Reference](docs/API.md)**
+
+---
+
+## What Is API Gateway?
+
+API Gateway is the natural evolution of the project that previously existed as a high-performance HTTPS server. The first version focused on TLS, static file serving, JSON validation, benchmarks and low-level SIMD/assembly experiments. The current version keeps that systems-engineering foundation and adds real gateway capabilities: dynamic routing, reverse proxying, upstream pools, load balancing, active/passive health checks, rate limiting, authentication and operational endpoints.
+
+The project now acts as an entry layer for internal services. It terminates HTTPS, parses requests, applies cross-cutting rules, forwards traffic to HTTP upstreams and exposes health and metrics signals. The original performance identity is still present in the crypto, parsing, validation, memory, compression and network-operation modules.
+
+## Current Capabilities
+
+- HTTPS server using OpenSSL.
+- Dynamic HTTP router with exact routes, wildcard routes and path params such as `/users/:id`.
+- Dedicated HTTP parser with configurable limits, case-insensitive headers, `Content-Length` body handling, path/query separation and query params.
+- Middleware pipeline for cross-cutting behavior.
+- Static files served from `client-web/`.
+- HTTP cache support for static files with `ETag`, `Last-Modified`, `Cache-Control` and `304 Not Modified`.
+- HTTP reverse proxy for internal services.
+- Proxy headers: `X-Forwarded-For`, `X-Forwarded-Proto`, `X-Real-IP` and `Via`.
+- Hop-by-hop header filtering before upstream forwarding.
+- Upstream pools with `round_robin` and `least_connections` selection.
+- Active HTTP health checks and passive failure tracking.
+- Token Bucket rate limiting with `429 Too Many Requests`.
+- `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` and `Retry-After` headers.
+- API key authentication and HMAC-SHA256 JWT validation.
+- Operational endpoints: `/gateway/health`, `/gateway/ready` and `/gateway/metrics`.
+- RFC 6455 WebSocket echo support over TLS, including handshake, text/binary frames, ping/pong and close.
+- SIMD/assembly modules for crypto, HTTP header-end scanning, validation, memory, compression and network operations.
+- Benchmark endpoints and CMake benchmark binaries.
+
+## Repository Layout
+
+```text
+client-web/                   static technical frontend
+docs/                         official documentation
+  ARQUITETURA.md              architecture and implementation details
+  API.md                      endpoints, configuration and HTTP contracts
+scripts/                      official build and benchmark scripts
+service-api/service-cpp/      C++ runtime, tests and CMake project
+service-api/service-assembly/ assembly acceleration routines
 ```
-src/
-├── core/           # Infrastructure (server, config, thread pool)
-├── crypto/         # Advanced crypto: ChaCha20, Blake3, X25519, AES-NI
-├── http/           # HTTP acceleration, compression, static serving
-├── utils/          # Network ops, validation, compression SIMD
-└── main.cpp        # Entry point and benchmark API
-```
 
-## 🔧 Technology Stack
+## Build
 
-### SIMD Optimizations
-- **AVX2**: 32-byte parallel processing for HTTP parsing
-- **VPSHUFB**: Base64 character lookup tables
-- **RDRAND**: Hardware random number generation for UUID v4
-- **Character Classification**: SIMD validation engines
+Requirements:
 
-### Advanced Cryptography
-- **ChaCha20-Poly1305**: Modern authenticated encryption
-- **Blake3**: Tree hashing with SIMD optimizations
-- **X25519**: Montgomery ladder scalar multiplication
-- **AES-NI + SHA-256**: Hand-optimized assembly implementations
+- C++17-capable compiler.
+- CMake 3.16+.
+- OpenSSL.
+- NASM.
+- Ninja is optional; the build script uses it automatically when available.
 
-### Compression Algorithms
-- **Deflate**: Optimized for small files with hash tables
-- **LZ4**: Ultra-fast compression with string matching
-- **Brotli**: Web content optimization for HTML/CSS/JS
-
-### Core Technologies
-- **C++17**: Modern C++ with advanced features
-- **OpenSSL 3.0**: Extended with custom provider
-- **CMake**: Cross-platform build system
-- **NASM**: x86-64 assembler for optimizations
-
-## 📋 Prerequisites
-
-- C++17+ compatible compiler (MSVC 2022, GCC 9+, Clang 10+)
-- CMake 3.16+
-- OpenSSL 3.0+
-- NASM (for assembly compilation)
-- CPU with AVX2 support (recommended for full performance)
-
-## 🚀 Quick Installation
-
-### Windows (Recommended)
+Main command:
 
 ```bash
-# Clone repository
-git clone https://github.com/thiagodifaria/HTTPS-Server.git
-cd HTTPS-Server
-
-# Build with PowerShell
-./build.ps1
-
-# Run server
-./build/Release/https_server.exe
+./scripts/build.sh Release
 ```
 
-### Linux/Unix
+On Windows, run it from Git Bash:
 
 ```bash
-# Clone repository
-git clone https://github.com/thiagodifaria/HTTPS-Server.git
-cd HTTPS-Server
-
-# Configure and build
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
-
-# Run server
-./https_server
+"C:/Program Files/Git/bin/bash.exe" ./scripts/build.sh Release
 ```
 
-## ⚙️ Configuration
-
-### Environment Configuration
-
-The server uses a `config.json` file for configuration:
-
-```json
-{
-    "port": 8443,
-    "threads": 0,
-    "cert_file": "cert.pem",
-    "key_file": "key.pem", 
-    "web_root": "public",
-    "log_level": "INFO"
-}
-```
-
-### CPU Feature Detection
-
-The server automatically detects and enables:
-- **AVX2**: For HTTP parsing and Base64 operations
-- **RDRAND**: For hardware UUID generation
-- **AES-NI**: For cryptographic acceleration
-
-## 📊 API Usage
-
-### Performance Benchmarks
+## Run
 
 ```bash
-# Real-time benchmark execution
-curl -k https://localhost:8443/api/benchmark
-
-# Returns performance data:
-# {
-#   "aes_ni": {"throughput": "3.51 GB/s", "time": "0.08s"},
-#   "sha256": {"throughput": "2.1 GB/s", "time": "0.12s"},
-#   "p256": {"field_ops": 850000, "ecdh_est": 1660}
-# }
+./build/api_gateway
+# Windows/Git Bash: ./build/api_gateway.exe
 ```
 
-### JSON API with SIMD Validation
+Default configuration:
+
+```text
+service-api/service-cpp/config/config.json
+```
+
+An alternate configuration file can be selected with the `HTTPS_SERVER_CONFIG` environment variable.
+
+## Quick Usage
+
+Health check:
+
+```bash
+curl -k https://localhost:8443/gateway/health
+```
+
+Readiness check with upstream state:
+
+```bash
+curl -k https://localhost:8443/gateway/ready
+```
+
+Prometheus metrics:
+
+```bash
+curl -k https://localhost:8443/gateway/metrics
+```
+
+JSON metrics:
+
+```bash
+curl -k -H "Accept: application/json" https://localhost:8443/gateway/metrics
+```
+
+JSON echo with validation and network helper operations:
 
 ```bash
 curl -k -X POST "https://localhost:8443/api/echo" \
-     -H "Content-Type: application/json" \
-     -d '{"message": "Hello World!", "encode_data": "test data"}'
+  -H "Content-Type: application/json" \
+  -d '{"message":"hello","encode_data":"gateway"}'
 ```
 
-**Response with network operations:**
-```json
-{
-  "message": "Hello World!",
-  "encode_data": "test data",
-  "base64_encoded": "dGVzdCBkYXRh",
-  "hex_encoded": "7465737420646174612020",
-  "received": true,
-  "timestamp": 1234567890,
-  "server": "HTTPS Server v1.0"
-}
-```
-
-### Web Performance Interface
+HTTP benchmarks:
 
 ```bash
-# Access benchmark interface
-curl -k https://localhost:8443/bench
-# Interactive web interface for running performance tests
-
-# Main interface with all features
-curl -k https://localhost:8443/
-# Modern HTML interface showcasing all optimizations
-```
-
-## 🛠️ Main Endpoints
-
-| Endpoint | Method | Description | SIMD Features |
-|----------|--------|-------------|---------------|
-| `/` | GET | Main interface | HTTP parsing acceleration |
-| `/about` | GET | Technical details | All optimization info |
-| `/bench` | GET | Benchmark interface | Real-time performance testing |
-| `/api/echo` | POST | JSON processing | SIMD validation + network ops |
-| `/api/benchmark` | GET | Performance API | All algorithm benchmarks |
-
-## 🧪 Testing and Benchmarks
-
-### Web-Based Benchmarks
-
-```bash
-# Access interactive benchmarks
-https://localhost:8443/bench
-
-# API endpoint for automated testing
 curl -k https://localhost:8443/api/benchmark
 ```
 
-### Command Line Tests
-
-```bash
-# AES assembly benchmark
-./build/Release/benchmark_aes.exe
-# Output: AES-NI Assembly: 3.51 GB/s (20M blocks, 305 MB in 0.08s)
-
-# SHA-256 assembly benchmark
-./build/Release/benchmark_sha256.exe
-# Output: SHA-256 Assembly: High performance with AVX registers
-
-# P-256 elliptic curve benchmark
-./build/Release/benchmark_p256.exe
-# Output: Field operations, point arithmetic, ECDH estimates
-```
-
-### SIMD Feature Testing
-
-The server logs SIMD capability detection:
-
-```
-[Info] AVX2 memory optimizations enabled
-[Info] HTTP parsing optimizations enabled  
-[Info] Network operations optimized (Base64/UUID/Hex with RDRAND+AVX2)
-[Info] Advanced crypto algorithms available (ChaCha20, Blake3, X25519)
-[Info] Compression optimizations enabled (Deflate/LZ4/Brotli)
-```
-
-## 📈 Performance and Benchmarks
-
-### Real-Time Performance
-
-Access live benchmarks at `https://localhost:8443/bench`:
-
-- **AES-NI Assembly**: 3.51 GB/s throughput
-- **SHA-256 AVX**: Vectorized hash computation
-- **HTTP Parsing**: AVX2 accelerated \r\n\r\n detection
-- **Base64 SIMD**: VPSHUFB lookup table operations
-- **UUID Generation**: Hardware RDRAND when available
-- **Compression**: Multi-algorithm optimization
-
-### SIMD Optimizations Implemented
-
-- **HTTP Parsing**: VPCMPEQB for 32-byte pattern matching
-- **Base64 Operations**: VPSHUFB character lookup tables  
-- **Validation Engine**: Character class detection with SIMD
-- **Compression**: Sliding window with hash tables
-- **Network Operations**: Batch processing for arrays
-
-## 🔒 Security Features
-
-- **TLS 1.3**: Latest encryption protocol
-- **SIMD Validation**: Fast input sanitization and JSON validation
-- **Advanced Crypto**: ChaCha20-Poly1305, Blake3, X25519 algorithms
-- **Hardware RNG**: RDRAND for secure UUID generation
-- **Input Validation**: SIMD character class detection
-- **Buffer Protection**: Safe memory management with zero-copy operations
-
-## 📄 Development
-
-### SIMD Module Structure
-
-```cpp
-// Example: Network operations usage
-auto& net_ops = network_ops::NetworkOps::instance();
-if (net_ops.has_avx2() && net_ops.has_rdrand()) {
-    // Hardware-accelerated operations
-    std::string encoded = net_ops.encode_base64(data);
-    uint8_t uuid[16];
-    net_ops.uuid_generate_v4(uuid);
-}
-
-// Example: HTTP parsing acceleration
-if (http_accelerated::HttpOps::instance().has_avx2()) {
-    size_t header_end;
-    bool found = http_ops.find_header_end(data, len, &header_end);
-}
-
-// Example: Validation with SIMD
-auto result = validation::ValidationOps::instance()
-    .json_validate_fast(json_data.c_str(), json_data.size());
-```
-
-### Benchmark Integration
-
-```cpp
-// Web-accessible performance testing
-router.add_route("GET", "/api/benchmark", [](const auto& req) {
-    auto aes_result = benchmark::run_aes_benchmark();
-    auto sha_result = benchmark::run_sha256_benchmark();
-    auto p256_result = benchmark::run_p256_benchmark();
-    
-    json response;
-    response["aes_ni"]["throughput"] = format_throughput(aes_result);
-    response["sha256"]["throughput"] = format_throughput(sha_result);
-    response["p256"]["field_ops"] = p256_result.field_ops_per_sec;
-    
-    return json_response(response);
-});
-```
-
-## 🚀 Production Deployment
-
-### Performance Considerations
-
-- Enable all SIMD optimizations with Release build
-- Verify CPU capabilities (AVX2, RDRAND, AES-NI)
-- Configure appropriate thread count for workload
-- Monitor performance via `/api/benchmark` endpoint
-- Use compression for static content delivery
-
-### SIMD Capability Monitoring
-
-The server provides comprehensive capability detection:
+## Gateway Configuration Example
 
 ```json
 {
-  "cpu_features": {
-    "avx2": true,
-    "rdrand": true,
-    "aes_ni": true
+  "upstreams": {
+    "users_service": {
+      "targets": [
+        "http://127.0.0.1:9001",
+        "http://127.0.0.1:9002"
+      ],
+      "health_path": "/gateway/health",
+      "health_interval_ms": 5000,
+      "health_timeout_ms": 1000,
+      "unhealthy_threshold": 2,
+      "healthy_threshold": 1
+    }
   },
-  "optimizations": {
-    "http_parsing": "enabled",
-    "network_operations": "full",
-    "validation_engine": "simd",
-    "compression": "multi-algorithm"
+  "proxy_routes": [
+    {
+      "method": "GET",
+      "path": "/api/v1/users/*",
+      "upstream": "users_service",
+      "strip_prefix": "/api/v1/users",
+      "load_balancer": "round_robin",
+      "require_auth": true
+    }
+  ],
+  "rate_limit": {
+    "enabled": true,
+    "capacity": 120,
+    "refill_per_second": 20,
+    "key": "ip"
+  },
+  "auth": {
+    "enabled": true,
+    "api_key_header": "X-API-Key",
+    "api_keys": ["local-dev-key"],
+    "jwt_hmac_secret": "local-secret"
   }
 }
 ```
 
-## 📚 Documentation
+## Tests And Benchmarks
 
-- **Web Interface**: Interactive demonstration of all SIMD features
-- **Benchmark Suite**: Real-time performance testing via web browser
-- **API Documentation**: Comprehensive endpoint documentation
-- **Architecture Guide**: SIMD optimization documentation
-- **Performance Analysis**: Detailed optimization explanations
+After building, test binaries are generated under `build/`:
 
-## 📜 License
+```bash
+./build/unit_test_http_parser
+./build/unit_test_router
+./build/unit_test_aes
+./build/unit_test_sha256
+./build/unit_test_p256
+./build/test_fast_memory
+```
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Benchmarks:
 
-## 📞 Contact
+```bash
+./scripts/run_benchmarks.sh
+```
 
-**Thiago Di Faria**
-- Email: thiagodifaria@gmail.com
-- GitHub: [@thiagodifaria](https://github.com/thiagodifaria)
-- Project: [https://github.com/thiagodifaria/HTTPS-Server](https://github.com/thiagodifaria/HTTPS-Server)
+## Technical Notes
+
+- The reverse proxy currently forwards to HTTP upstreams.
+- The implemented WebSocket support is local echo support; it does not proxy WebSocket traffic to upstreams.
+- JWT authentication uses HMAC-SHA256.
+- `required_scopes` exists in route configuration, but scope enforcement is not applied by the current runtime.
+- `observability.json_logs` exists in configuration, but the current logger still emits text logs.
+
+## License
+
+Distributed under the MIT License. See [LICENSE](LICENSE).
 
 ---
 
-⭐ **HTTPS Server** - Extreme performance with comprehensive SIMD optimizations and modern architecture.
+## Author
+
+**Thiago Di Faria**  
+Email: [thiagodifaria@gmail.com](mailto:thiagodifaria@gmail.com)  
+GitHub: [@thiagodifaria](https://github.com/thiagodifaria)
+
+Built as a systems-engineering showcase in C++17, preserving the performance-focused roots of the original HTTPS server while evolving it into an API Gateway.

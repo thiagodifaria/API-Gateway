@@ -18,6 +18,7 @@ https_server
 .idea/
 *.suo
 *.user
+.cache
 
 *.log
 *.tmp

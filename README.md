@@ -1,148 +1,129 @@
-# HTTPS Server
+# API Gateway
 
-![HTTPS Server Logo](https://img.shields.io/badge/HTTPS%20Server-High%20Performance-blue?style=for-the-badge&logo=cplusplus)
+![API Gateway](https://img.shields.io/badge/API%20Gateway-High%20Performance-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
 
-**High-Performance HTTPS Server with SIMD-Optimized Network Operations**
+**High-performance C++17 API Gateway with HTTPS, reverse proxy, load balancing, health checks, authentication, rate limiting, observability and SIMD/assembly acceleration.**
 
-[![C++](https://img.shields.io/badge/C++-17-00599c?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org)
-[![OpenSSL](https://img.shields.io/badge/OpenSSL-3.0-721412?style=flat&logo=openssl&logoColor=white)](https://openssl.org)
-[![CMake](https://img.shields.io/badge/CMake-3.16+-064f8c?style=flat&logo=cmake&logoColor=white)](https://cmake.org)
-[![NASM](https://img.shields.io/badge/NASM-Assembly-ff6600?style=flat)](https://nasm.us)
+[![C++](https://img.shields.io/badge/C++-17-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org)
+[![OpenSSL](https://img.shields.io/badge/OpenSSL-TLS-721412?style=flat&logo=openssl&logoColor=white)](https://openssl.org)
+[![CMake](https://img.shields.io/badge/CMake-3.16+-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org)
+[![NASM](https://img.shields.io/badge/NASM-Assembly-FF6600?style=flat)](https://nasm.us)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat)](LICENSE)
-[![Windows](https://img.shields.io/badge/Windows-Ready-0078d4?style=flat&logo=windows&logoColor=white)](https://microsoft.com/windows)
 
 ---
 
-## 🌐 **Documentation / Documentação**
+## Documentation
 
-**📖 [🇺🇸 Read in English](README_EN.md)**  
-**📖 [🇧🇷 Leia em Português](README_PT.md)**
+**[Read in English](README_EN.md)**  
+**[Leia em Portugues](README_PT.md)**  
+**[Architecture](docs/ARQUITETURA.md)**  
+**[API Reference](docs/API.md)**
 
 ---
 
-## 🎯 What is HTTPS Server?
+## What Is API Gateway?
 
-A **production-ready HTTPS server** built in C++17 featuring comprehensive **SIMD-optimized network operations** and **advanced assembly cryptographic implementations**. Designed for maximum throughput, security, and efficiency in modern web applications.
+API Gateway is the natural evolution of the original HTTPS server project. The first version focused on TLS, static files, JSON validation, benchmarks and low-level performance experiments. The current version keeps that systems-engineering base and adds gateway behavior on top of it: dynamic routing, reverse proxying, upstream pools, load balancing, active/passive health checks, Token Bucket rate limiting, API key/JWT authentication and operational endpoints.
 
-### ⚡ Key Highlights
+The result is a compact C++ gateway that can terminate HTTPS, inspect and route requests, protect upstream services and expose runtime visibility while still preserving the original SIMD/assembly performance identity.
 
-- 🔒 **Advanced Cryptography** - AES-NI, SHA-256 AVX2, ChaCha20, Blake3, X25519
-- 🚀 **SIMD Network Operations** - Base64 vectorized, UUID v4 with hardware RNG, hex encoding
-- 📊 **HTTP Performance** - AVX2 parsing acceleration, validation engine, compression suite  
-- 🛡️ **Production Ready** - TLS 1.3, input validation SIMD, structured logging
-- 🌐 **Cross Platform** - Windows and Linux support with automatic CPU detection
-- ⚙️ **Optimized Core** - Deflate/LZ4/Brotli compression, zero-copy buffer management
+## Current Capabilities
 
-### 🏆 What Makes It Special?
+- HTTPS server built with OpenSSL.
+- Dynamic HTTP router with exact routes, wildcard routes and path params such as `/users/:id`.
+- Dedicated HTTP parser with request limits, case-insensitive headers, body handling through `Content-Length`, path/query split and query params.
+- Middleware pipeline for cross-cutting concerns.
+- Static file serving from `client-web/` with `ETag`, `Last-Modified`, `Cache-Control` and `304 Not Modified`.
+- HTTP reverse proxy for internal upstreams.
+- `X-Forwarded-For`, `X-Forwarded-Proto`, `X-Real-IP` and `Via` proxy headers.
+- Hop-by-hop header filtering before forwarding requests.
+- Upstream pools with `round_robin` and `least_connections` selection.
+- Active HTTP health checks and passive failure tracking.
+- Token Bucket rate limiting with `429 Too Many Requests` and `RateLimit-*` headers.
+- API key authentication and HMAC-SHA256 JWT validation.
+- Gateway endpoints: `/gateway/health`, `/gateway/ready` and `/gateway/metrics`.
+- WebSocket RFC 6455 echo support over TLS, including handshake, text/binary frames, ping/pong and close.
+- SIMD/assembly modules for crypto, HTTP scanning, validation, memory, compression and network operations.
+- Benchmark endpoints and command-line benchmark targets for crypto/performance checks.
 
+## Repository Layout
+
+```text
+client-web/                   static technical frontend
+docs/                         official documentation
+  ARQUITETURA.md              architecture and implementation notes
+  API.md                      endpoints, config and HTTP contracts
+scripts/                      build and benchmark entrypoints
+service-api/service-cpp/      C++ gateway runtime, tests and CMake project
+service-api/service-assembly/ assembly acceleration routines
 ```
-✅ HTTP parsing accelerated with AVX2 (\r\n\r\n detection)
-✅ JSON validation engine with SIMD character classification
-✅ Advanced crypto: ChaCha20-Poly1305, Blake3, X25519
-✅ Compression suite: Deflate, LZ4, Brotli optimized
-✅ Network operations: Base64 SIMD, UUID v4 RDRAND, hex vectorized
-✅ Complete performance benchmark suite accessible via web interface
-```
 
----
+## Quick Start
 
-## ⚡ Quick Start
+Prerequisites:
 
-### Prerequisites
-- **C++17** compatible compiler (MSVC 2022, GCC 9+, Clang 10+)
-- **CMake 3.16+**
-- **OpenSSL 3.0+**
-- **NASM** for assembly compilation
+- C++17 compiler.
+- CMake 3.16+.
+- OpenSSL.
+- NASM.
+- Ninja is optional, but used automatically when available.
 
-### Build and Run
+Build:
+
 ```bash
-# Clone repository
-git clone https://github.com/thiagodifaria/HTTPS-Server.git
-cd HTTPS-Server
-
-# Windows (PowerShell)
-./build.ps1
-
-# Linux/Unix
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
-
-# Run server
-./https_server
-# Server starts at https://localhost:8443
+./scripts/build.sh Release
 ```
 
-### 🔥 Test It Now!
+Windows with Git Bash:
+
 ```bash
-# Test JSON API with SIMD validation
-curl -k -X POST "https://localhost:8443/api/echo" \
-     -H "Content-Type: application/json" \
-     -d '{"message": "Hello World!", "encode_data": "test"}'
+"C:/Program Files/Git/bin/bash.exe" ./scripts/build.sh Release
+```
 
-# Response includes Base64/Hex encoding:
-# {
-#   "message": "Hello World!",
-#   "encode_data": "test",
-#   "base64_encoded": "dGVzdA==",
-#   "hex_encoded": "74657374",
-#   "received": true,
-#   "server": "HTTPS Server v1.0"
-# }
+Run:
 
-# Performance benchmarks
+```bash
+./build/api_gateway
+# Windows/Git Bash: ./build/api_gateway.exe
+```
+
+Default configuration:
+
+```text
+service-api/service-cpp/config/config.json
+```
+
+## Basic Checks
+
+```bash
+curl -k https://localhost:8443/gateway/health
+curl -k https://localhost:8443/gateway/ready
+curl -k https://localhost:8443/gateway/metrics
 curl -k https://localhost:8443/api/benchmark
 ```
 
----
+POST JSON with SIMD validation and network encoding helpers:
 
-## 🔥 Performance Benchmarks
+```bash
+curl -k -X POST "https://localhost:8443/api/echo" \
+  -H "Content-Type: application/json" \
+  -d '{"message":"hello","encode_data":"gateway"}'
+```
 
-| Component | Throughput | Details |
-|-----------|------------|---------|
-| 🔐 **AES-NI Assembly** | **3.51 GB/s** | 20M blocks, hand-optimized implementation |
-| 🔒 **SHA-256 AVX** | **High Performance** | Vectorized hash computation |
-| 🌐 **HTTP Parsing** | **Sub-millisecond** | AVX2 accelerated \r\n\r\n detection |
-| 📊 **Base64 SIMD** | **Vectorized** | VPSHUFB lookup table encoding |
-| 🎲 **UUID Generation** | **Hardware RNG** | RDRAND instruction when available |
-| 🗜️ **Compression** | **Multi-algorithm** | Deflate, LZ4, Brotli optimized |
+## Build Outputs
 
-*Access real-time benchmarks at https://localhost:8443/bench*
+The main executable is `api_gateway`. Test and benchmark binaries are generated in `build/` as separate targets, including parser/router tests and crypto benchmarks.
 
----
+## License
 
-## 🛠️ SIMD Modules
-
-### 📡 Network Operations
-- **Base64 SIMD**: Vectorized encoding/decoding with lookup tables
-- **UUID v4**: Hardware RNG (RDRAND) with assembly fallback
-- **Hex Encoding**: Optimized binary to hex string conversion
-
-### 🔍 Validation Engine  
-- **JSON SIMD**: Fast validation without complete parsing
-- **UTF-8 Vectorized**: Character encoding validation
-- **Input Sanitization**: SIMD character class detection
-
-### 🗜️ Compression Suite
-- **Deflate**: Optimized for files < 64KB
-- **LZ4**: Ultra-fast compression
-- **Brotli**: Web content optimization (HTML/CSS/JS)
-
-### ⚡ HTTP Acceleration
-- **AVX2 Parsing**: 32-byte simultaneous processing
-- **Header Detection**: Vectorized \r\n\r\n search
-- **Method/URI Extraction**: Accelerated request parsing
+Distributed under the MIT License. See [LICENSE](LICENSE).
 
 ---
 
-## 📞 Contact
+## Author
 
-**Thiago Di Faria** - thiagodifaria@gmail.com
+**Thiago Di Faria**  
+Email: [thiagodifaria@gmail.com](mailto:thiagodifaria@gmail.com)  
+GitHub: [@thiagodifaria](https://github.com/thiagodifaria)
 
-[![GitHub](https://img.shields.io/badge/GitHub-@thiagodifaria-black?style=flat&logo=github)](https://github.com/thiagodifaria)
-
----
-
-### 🌟 **Star this project if you find it useful!**
-
-**Made with ❤️ by [Thiago Di Faria](https://github.com/thiagodifaria)**
+Built as a systems-engineering showcase in C++17, preserving the performance-focused roots of the original HTTPS server while evolving it into an API Gateway.

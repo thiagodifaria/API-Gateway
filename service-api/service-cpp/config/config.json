@@ -1,0 +1,52 @@
+{
+    "port": 8443,
+    "threads": 0,
+    "cert_file": "service-api/service-cpp/certs/cert.pem",
+    "key_file": "service-api/service-cpp/certs/key.pem",
+    "web_root": "client-web",
+    "log_level": "Debug",
+    "client_ca_file": "",
+    "http": {
+        "max_header_bytes": 65536,
+        "max_body_bytes": 2097152,
+        "read_timeout_ms": 5000,
+        "write_timeout_ms": 5000,
+        "max_uri_bytes": 8192,
+        "keep_alive": false
+    },
+    "upstreams": {},
+    "proxy_routes": [],
+    "rate_limit": {
+        "enabled": true,
+        "capacity": 120,
+        "refill_per_second": 20,
+        "key": "ip"
+    },
+    "auth": {
+        "enabled": false,
+        "api_key_header": "X-API-Key",
+        "api_keys": [],
+        "jwt_hmac_secret": "",
+        "issuer": "",
+        "audience": ""
+    },
+    "observability": {
+        "metrics_enabled": true,
+        "json_logs": false
+    },
+    "websocket": {
+        "enabled": true,
+        "max_frame_bytes": 1048576,
+        "idle_timeout_ms": 60000
+    },
+    "security": {
+        "enable_hsts": true,
+        "enable_csp": true,
+        "enable_xcto": true,
+        "enable_xfo": true,
+        "hsts_max_age": "31536000",
+        "hsts_include_subdomains": true,
+        "hsts_preload": false,
+        "csp_policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'"
+    }
+}
