@@ -242,7 +242,9 @@ $env:HTTPS_SERVER_CONFIG = "path/to/config.json"
     "enabled": false,
     "api_key_header": "X-API-Key",
     "api_keys": [],
+    "jwt_algorithm": "HS256",
     "jwt_hmac_secret": "",
+    "jwt_public_key_file": "",
     "issuer": "",
     "audience": ""
   },
@@ -316,6 +318,7 @@ Campos:
       "strip_prefix": "/api/v1/users",
       "load_balancer": "least_connections",
       "require_auth": true,
+      "required_scopes": ["users:read"],
       "rate_limit": true,
       "websocket": false
     }
@@ -331,6 +334,7 @@ Campos:
 - `strip_prefix`: prefixo removido antes de encaminhar.
 - `load_balancer`: `round_robin` ou `least_connections`.
 - `require_auth`: exige API key ou JWT valido.
+- `required_scopes`: lista de escopos obrigatorios; exige JWT e retorna `403` quando o token nao contem todos os escopos.
 - `rate_limit`: campo de configuracao presente; o middleware atual aplica limite global quando `rate_limit.enabled` esta ativo.
 - `websocket`: campo de configuracao presente; WebSocket atual e echo local.
 
@@ -400,19 +404,46 @@ JWT:
 curl -k -H "Authorization: Bearer <token>" https://localhost:8443/api/v1/users/list
 ```
 
+Algoritmos JWT suportados:
+
+- `HS256` com `jwt_hmac_secret`.
+- `RS256` com `jwt_public_key_file`.
+- `ES256` com `jwt_public_key_file`.
+
 Validacoes JWT:
 
 - Assinatura HMAC-SHA256.
+- Assinatura assimetrica por chave publica quando `jwt_algorithm` e `RS256` ou `ES256`.
 - `exp`, quando presente.
 - `nbf`, quando presente.
 - `iss`, quando configurado.
 - `aud`, quando configurado.
+- Escopos em `scope`, `scp` ou `roles`, quando a rota configura `required_scopes`.
 
 Falha:
 
 ```text
 HTTP/1.1 401 Unauthorized
 WWW-Authenticate: Bearer
+```
+
+Escopo insuficiente:
+
+```text
+HTTP/1.1 403 Forbidden
+```
+
+## Logs JSON
+
+Quando `observability.json_logs` e `true`, logs sao emitidos como JSON por linha:
+
+```json
+{
+  "timestamp": "2026-05-25 14:30:00",
+  "level": "Info",
+  "log_id": "0e1f2a3b-4c5d-6e7f-8899-aabbccddeeff",
+  "message": "Access: GET /gateway/health -> 200"
+}
 ```
 
 ## WebSocket
@@ -454,6 +485,7 @@ Comportamento atual:
 | `304 Not Modified` | Cache de arquivo estatico valido |
 | `400 Bad Request` | Request malformada, JSON invalido ou WebSocket incompleto |
 | `401 Unauthorized` | Rota autenticada sem credencial valida |
+| `403 Forbidden` | JWT valido sem escopos exigidos |
 | `404 Not Found` | Rota ou arquivo nao encontrado |
 | `405 Method Not Allowed` | Path existe para outro metodo |
 | `413 Payload Too Large` | Body acima do limite |
@@ -467,6 +499,5 @@ Comportamento atual:
 
 - Upstreams de proxy aceitam `http://`.
 - WebSocket nao e encaminhado para upstream.
-- Escopos/roles de JWT ainda nao sao aplicados.
-- Logs estruturados em JSON ainda nao sao emitidos pelo logger atual.
+- HTTP/2, HTTP/3 e proxy gRPC nao fazem parte do runtime atual.
 - Conexoes HTTP persistentes completas ainda nao fazem parte do comportamento do runtime.

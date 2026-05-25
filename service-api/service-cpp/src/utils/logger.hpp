@@ -19,6 +19,7 @@ public:
     static Logger& instance();
     
     void set_level(LogLevel level);
+    void set_json_output(bool enabled);
     void log(LogLevel level, const std::string& message);
     void log_with_binary_data(LogLevel level, const std::string& message, 
                               const void* data, size_t size);
@@ -32,6 +33,7 @@ private:
     
     std::mutex mutex_;
     LogLevel level_ = LogLevel::Info;
+    bool json_output_ = false;
     std::ofstream file_;
 };
 

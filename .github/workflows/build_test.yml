@@ -1,0 +1,50 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  windows-mingw:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain
+        shell: powershell
+        run: |
+          choco install cmake ninja nasm mingw openssl -y
+
+      - name: Build
+        shell: bash
+        run: ./scripts/build.sh Release
+
+      - name: Run unit tests
+        shell: bash
+        run: |
+          ./build/unit_test_http_parser.exe
+          ./build/unit_test_router.exe
+          ./build/unit_test_auth.exe
+          ./build/unit_test_aes.exe
+          ./build/unit_test_sha256.exe
+          ./build/unit_test_p256.exe
+          if [ -f ./build/test_fast_memory.exe ]; then ./build/test_fast_memory.exe; fi
+
+  linux-configure:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build nasm g++ libssl-dev
+
+      - name: Configure
+        run: cmake -S service-api/service-cpp -B build-linux -G Ninja -DCMAKE_BUILD_TYPE=Release

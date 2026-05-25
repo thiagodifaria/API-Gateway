@@ -42,7 +42,8 @@ The project now acts as an entry layer for internal services. It terminates HTTP
 - Active HTTP health checks and passive failure tracking.
 - Token Bucket rate limiting with `429 Too Many Requests`.
 - `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` and `Retry-After` headers.
-- API key authentication and HMAC-SHA256 JWT validation.
+- API key authentication, HMAC-SHA256 JWT validation, asymmetric JWT validation through public keys and route-level scope enforcement.
+- Optional JSON logs for observability pipelines.
 - Operational endpoints: `/gateway/health`, `/gateway/ready` and `/gateway/metrics`.
 - RFC 6455 WebSocket echo support over TLS, including handshake, text/binary frames, ping/pong and close.
 - SIMD/assembly modules for crypto, HTTP header-end scanning, validation, memory, compression and network operations.
@@ -186,6 +187,7 @@ After building, test binaries are generated under `build/`:
 ```bash
 ./build/unit_test_http_parser
 ./build/unit_test_router
+./build/unit_test_auth
 ./build/unit_test_aes
 ./build/unit_test_sha256
 ./build/unit_test_p256
@@ -202,9 +204,8 @@ Benchmarks:
 
 - The reverse proxy currently forwards to HTTP upstreams.
 - The implemented WebSocket support is local echo support; it does not proxy WebSocket traffic to upstreams.
-- JWT authentication uses HMAC-SHA256.
-- `required_scopes` exists in route configuration, but scope enforcement is not applied by the current runtime.
-- `observability.json_logs` exists in configuration, but the current logger still emits text logs.
+- JWT authentication supports HMAC-SHA256 and public-key asymmetric verification.
+- HTTP/2, HTTP/3 and gRPC proxying are not part of the current runtime.
 
 ## License
 

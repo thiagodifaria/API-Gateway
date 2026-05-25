@@ -26,6 +26,7 @@ int main() {
         const auto config = https_server::Config::load();
         
         https_server::Logger::instance().set_level(config.log_level);
+        https_server::Logger::instance().set_json_output(config.observability.json_logs);
         LOG_INFO("Configuration loaded successfully");
         
         https_server::Server server(config);
@@ -257,8 +258,8 @@ int main() {
         for (const auto& proxy_route : config.proxy_routes) {
             router.add_route(proxy_route.method, proxy_route.path,
                 [&reverse_proxy, &authenticator, proxy_route](const https_server::http::HttpRequest& req) {
-                    auto auth_response = authenticator.authorize(req, proxy_route.require_auth);
-                    if (auth_response.status_code == 401) {
+                    auto auth_response = authenticator.authorize(req, proxy_route.require_auth, proxy_route.required_scopes);
+                    if (auth_response.status_code == 401 || auth_response.status_code == 403) {
                         return auth_response;
                     }
                     return reverse_proxy.handle(req, proxy_route);

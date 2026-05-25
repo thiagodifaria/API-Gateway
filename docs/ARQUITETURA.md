@@ -103,6 +103,8 @@ Contem middlewares independentes:
 - Rate limiter Token Bucket.
 - Autenticacao por API key.
 - Validacao JWT HMAC-SHA256.
+- Validacao JWT assimetrica com chave publica para `RS256` e `ES256`.
+- Enforcement de escopos por rota com `required_scopes`.
 
 O pipeline de middleware permite aplicar comportamento transversal sem misturar regras de seguranca, limite e observabilidade dentro dos handlers finais.
 
@@ -124,7 +126,7 @@ As metricas sao expostas em `/gateway/metrics`, em texto Prometheus por padrao o
 
 Reune componentes de suporte:
 
-- Logger.
+- Logger com saida texto ou JSON estruturado.
 - Buffer.
 - Operacoes HTTP aceleradas.
 - Validacao.
@@ -230,8 +232,14 @@ A autenticacao suporta:
 
 - API key por header configuravel.
 - JWT assinado com HMAC-SHA256.
+- JWT assimetrico com chave publica para `RS256` e `ES256`.
+- Escopos por rota via `required_scopes`.
 
-A validacao JWT verifica assinatura e campos temporais `exp` e `nbf`. Quando configurados, tambem valida `iss` e `aud`.
+A validacao JWT verifica assinatura e campos temporais `exp` e `nbf`. Quando configurados, tambem valida `iss` e `aud`. Quando a rota define `required_scopes`, o token precisa conter todos os escopos exigidos em `scope`, `scp` ou `roles`.
+
+## Observabilidade
+
+O gateway expoe health, readiness e metricas. Logs podem ser emitidos em texto ou JSON, controlados por `observability.json_logs`. O formato JSON inclui timestamp, level, log id e mensagem, permitindo ingestao por coletores como Fluent Bit, Datadog Agent, OpenTelemetry Collector ou stacks ELK/OpenSearch.
 
 ## Cache HTTP de estaticos
 
@@ -269,8 +277,7 @@ Esta secao descreve o estado real do runtime atual:
 
 - Upstreams do reverse proxy usam HTTP, nao HTTPS.
 - WebSocket esta implementado como echo local, nao como proxy para upstream.
-- `required_scopes` existe na configuracao, mas nao ha enforcement de escopos no middleware atual.
-- `observability.json_logs` existe na configuracao, mas o logger atual emite texto.
+- HTTP/2, HTTP/3 e proxy gRPC nao fazem parte do runtime atual.
 - O loop de conexao fecha a conexao HTTP apos uma resposta; `keep_alive` existe na configuracao, mas conexoes HTTP persistentes completas nao estao implementadas.
 
 ## Build e runtime

@@ -170,7 +170,9 @@ ServerConfig Config::load(const std::string& filename) {
         const auto& auth = j["auth"];
         if (auth.contains("enabled")) config.auth.enabled = auth["enabled"];
         if (auth.contains("api_key_header")) config.auth.api_key_header = auth["api_key_header"];
+        if (auth.contains("jwt_algorithm")) config.auth.jwt_algorithm = auth["jwt_algorithm"];
         if (auth.contains("jwt_hmac_secret")) config.auth.jwt_hmac_secret = auth["jwt_hmac_secret"];
+        if (auth.contains("jwt_public_key_file")) config.auth.jwt_public_key_file = auth["jwt_public_key_file"];
         if (auth.contains("issuer")) config.auth.issuer = auth["issuer"];
         if (auth.contains("audience")) config.auth.audience = auth["audience"];
         if (auth.contains("api_keys") && auth["api_keys"].is_array()) {

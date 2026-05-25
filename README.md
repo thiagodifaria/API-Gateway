@@ -40,7 +40,8 @@ The result is a compact C++ gateway that can terminate HTTPS, inspect and route 
 - Upstream pools with `round_robin` and `least_connections` selection.
 - Active HTTP health checks and passive failure tracking.
 - Token Bucket rate limiting with `429 Too Many Requests` and `RateLimit-*` headers.
-- API key authentication and HMAC-SHA256 JWT validation.
+- API key authentication, HMAC-SHA256 JWT validation, asymmetric JWT validation through public keys and route-level scope enforcement.
+- Optional JSON logs for ingestion by log pipelines.
 - Gateway endpoints: `/gateway/health`, `/gateway/ready` and `/gateway/metrics`.
 - WebSocket RFC 6455 echo support over TLS, including handshake, text/binary frames, ping/pong and close.
 - SIMD/assembly modules for crypto, HTTP scanning, validation, memory, compression and network operations.
@@ -112,7 +113,7 @@ curl -k -X POST "https://localhost:8443/api/echo" \
 
 ## Build Outputs
 
-The main executable is `api_gateway`. Test and benchmark binaries are generated in `build/` as separate targets, including parser/router tests and crypto benchmarks.
+The main executable is `api_gateway`. Test and benchmark binaries are generated in `build/` as separate targets, including parser/router/auth tests and crypto benchmarks.
 
 ## License
 

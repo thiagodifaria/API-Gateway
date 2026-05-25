@@ -42,7 +42,8 @@ O objetivo do projeto agora e atuar como uma camada de entrada para servicos int
 - Health checks HTTP ativos e rastreamento passivo de falhas.
 - Rate limiting por Token Bucket com resposta `429 Too Many Requests`.
 - Headers `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` e `Retry-After`.
-- Autenticacao por API key e validacao JWT HMAC-SHA256.
+- Autenticacao por API key, JWT HMAC-SHA256, JWT assimetrico por chave publica e enforcement de escopos por rota.
+- Logs estruturados em JSON opcionais para pipelines de observabilidade.
 - Endpoints operacionais: `/gateway/health`, `/gateway/ready` e `/gateway/metrics`.
 - Suporte WebSocket RFC 6455 em modo echo sobre TLS, com handshake, frames texto/binario, ping/pong e close.
 - Modulos SIMD/assembly para crypto, busca de fim de header HTTP, validacao, memoria, compressao e operacoes de rede.
@@ -186,6 +187,7 @@ Depois do build, os binarios de teste ficam em `build/`:
 ```bash
 ./build/unit_test_http_parser
 ./build/unit_test_router
+./build/unit_test_auth
 ./build/unit_test_aes
 ./build/unit_test_sha256
 ./build/unit_test_p256
@@ -202,9 +204,8 @@ Benchmarks:
 
 - O reverse proxy atual encaminha para upstreams HTTP.
 - O suporte WebSocket implementado no gateway e echo local; ele nao faz proxy WebSocket para upstream.
-- A autenticacao JWT implementada usa HMAC-SHA256.
-- O campo `required_scopes` existe na configuracao de rota, mas a validacao de escopo ainda nao e aplicada pelo runtime atual.
-- O campo `observability.json_logs` existe na configuracao, mas o logger atual permanece em texto.
+- A autenticacao JWT suporta HMAC-SHA256 e validacao assimetrica por chave publica.
+- HTTP/2, HTTP/3 e proxy gRPC ainda nao fazem parte do runtime atual.
 
 ## Licenca
 

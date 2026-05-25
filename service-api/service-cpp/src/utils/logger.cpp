@@ -4,6 +4,7 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
+#include <cstdlib>
 
 namespace https_server {
 
@@ -16,6 +17,37 @@ void Logger::set_level(LogLevel level) {
     std::lock_guard<std::mutex> lock(mutex_);
     level_ = level;
 }
+
+void Logger::set_json_output(bool enabled) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    json_output_ = enabled;
+}
+
+namespace {
+
+std::string json_escape(const std::string& input) {
+    std::ostringstream out;
+    for (const unsigned char ch : input) {
+        switch (ch) {
+            case '\\': out << "\\\\"; break;
+            case '"': out << "\\\""; break;
+            case '\b': out << "\\b"; break;
+            case '\f': out << "\\f"; break;
+            case '\n': out << "\\n"; break;
+            case '\r': out << "\\r"; break;
+            case '\t': out << "\\t"; break;
+            default:
+                if (ch < 0x20) {
+                    out << "\\u" << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(ch);
+                } else {
+                    out << static_cast<char>(ch);
+                }
+        }
+    }
+    return out.str();
+}
+
+} // namespace
 
 void Logger::log(LogLevel level, const std::string& message) {
     if (level < level_) return;
@@ -37,9 +69,18 @@ void Logger::log(LogLevel level, const std::string& message) {
     const char* level_str[] = {"Debug", "Info", "Warning", "Error"};
     
     std::string log_id = network_ops::NetworkOps::instance().generate_uuid_string();
-    
-    std::cout << "[" << ss.str() << "] [" << level_str[static_cast<int>(level)] 
-              << "] [" << log_id.substr(0, 8) << "] " << message << std::endl;
+
+    if (json_output_) {
+        std::cout << "{"
+                  << "\"timestamp\":\"" << ss.str() << "\","
+                  << "\"level\":\"" << level_str[static_cast<int>(level)] << "\","
+                  << "\"log_id\":\"" << log_id << "\","
+                  << "\"message\":\"" << json_escape(message) << "\""
+                  << "}" << std::endl;
+    } else {
+        std::cout << "[" << ss.str() << "] [" << level_str[static_cast<int>(level)]
+                  << "] [" << log_id.substr(0, 8) << "] " << message << std::endl;
+    }
 }
 
 void Logger::log_with_binary_data(LogLevel level, const std::string& message, 

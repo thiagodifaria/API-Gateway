@@ -75,7 +75,9 @@ struct ServerConfig {
         bool enabled = false;
         std::string api_key_header = "X-API-Key";
         std::vector<std::string> api_keys;
+        std::string jwt_algorithm = "HS256";
         std::string jwt_hmac_secret;
+        std::string jwt_public_key_file;
         std::string issuer;
         std::string audience;
     };
