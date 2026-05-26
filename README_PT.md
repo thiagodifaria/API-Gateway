@@ -21,6 +21,26 @@
 
 ---
 
+## Preview visual
+
+### Dashboard
+
+![Dashboard do API Gateway](client-web/public/images/screenshots/dashboard.png)
+
+### Metricas
+
+![Metricas do API Gateway](client-web/public/images/screenshots/metricas.png)
+
+### Proxy Routes
+
+![Rotas de proxy do API Gateway](client-web/public/images/screenshots/proxyroutes.png)
+
+### Console de testes
+
+![Console de testes do API Gateway](client-web/public/images/screenshots/console.png)
+
+---
+
 ## O que e o API Gateway?
 
 API Gateway e a evolucao natural do projeto que antes era um servidor HTTPS de alta performance. A primeira versao nasceu focada em TLS, arquivos estaticos, validacao JSON, benchmarks e experimentos de baixo nivel com SIMD e assembly. A versao atual preserva essa base de engenharia de sistemas e adiciona recursos reais de gateway: roteamento dinamico, reverse proxy, pools de upstream, balanceamento de carga, health checks ativos/passivos, rate limiting, autenticacao e endpoints operacionais.

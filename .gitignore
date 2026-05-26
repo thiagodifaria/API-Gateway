@@ -22,3 +22,6 @@ https_server
 
 *.log
 *.tmp
+
+client-web/node_modules/
+client-web/dist/
